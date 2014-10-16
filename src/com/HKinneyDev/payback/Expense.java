@@ -6,6 +6,7 @@ import java.util.Map;
 public class Expense {
 	User        		owner;
 	Map<User, Double> 	amountDueByUser = new HashMap<User, Double>();
+	String 				comments;
 	
 	public Expense(double [] amountDue, User [] involvedUsers, User owner) {
 		this.owner = owner;
