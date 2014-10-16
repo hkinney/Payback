@@ -1,23 +1,31 @@
 package com.HKinneyDev.payback;
 
+import java.util.Arrays;
+import java.util.List;
+
 import android.app.Activity;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
+import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.content.Context;
-import android.os.Build;
-import android.os.Bundle;
-import android.view.Gravity;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.support.v4.widget.DrawerLayout;
-import android.widget.ArrayAdapter;
-import android.widget.TextView;
+import android.widget.Button;
 
+import com.facebook.LoginActivity;
+import com.parse.LogInCallback;
+import com.parse.Parse;
+import com.parse.ParseException;
+import com.parse.ParseFacebookUtils;
+import com.parse.ParseUser;
 
 public class MainActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -31,12 +39,12 @@ public class MainActivity extends ActionBarActivity
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
     private CharSequence mTitle;
-
+   
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
-
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
         mTitle = getTitle();
@@ -45,6 +53,9 @@ public class MainActivity extends ActionBarActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+        
+        Parse.initialize(this, "PFIrWVFL7MJ1QIFkJ3WvX9DrXXtNOyzpa7njYBf0",
+        		"qXnCfX6cY3wWfm5IBefPXGxARVp61fubYJ0qlaxZ");
     }
 
     @Override
@@ -112,6 +123,8 @@ public class MainActivity extends ActionBarActivity
          * fragment.
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
+        Button loginButton;
+    	private Dialog progressDialog;
 
         /**
          * Returns a new instance of this fragment for the given section
@@ -128,13 +141,48 @@ public class MainActivity extends ActionBarActivity
         public PlaceholderFragment() {
         }
 
+      
+        
+      
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+			loginButton      = (Button)     rootView.findViewById(R.id.button1);			
+			
+			loginButton.setOnClickListener(new View.OnClickListener() {
+	             public void onClick(View v) {
+	            	 loginButtonClick();
+	             }
+	         });
+			
             return rootView;
+            
         }
 
+    	public void loginButtonClick() {
+    	    progressDialog = ProgressDialog.show(
+    	            getActivity(), "", "Logging in...", true);
+    	    List<String> permissions = Arrays.asList("public_profile", "user_friends", "user_about_me",
+    	            "user_relationships", "user_birthday", "user_location");
+    	    ParseFacebookUtils.logIn(permissions, getActivity(), new LogInCallback() {
+    	        @Override
+    	        public void done(ParseUser user, ParseException err) {
+    	            progressDialog.dismiss();
+    	            if (user == null) {
+    	                Log.d("Payback",
+    	                        "Uh oh. The user cancelled the Facebook login.");
+    	            } else if (user.isNew()) {
+    	                Log.d("Payback",
+    	                        "User signed up and logged in through Facebook!");
+    	            } else {
+    	                Log.d("Payback",
+    	                        "User logged in through Facebook!");
+    	            }
+    	        }
+    	    });
+    	}
+        
         @Override
         public void onAttach(Activity activity) {
             super.onAttach(activity);
